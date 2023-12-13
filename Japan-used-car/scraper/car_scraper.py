@@ -1,3 +1,8 @@
+'''
+This scraper is to be used only with link "https://www.carsensor.net/usedcar/spK/index1.html?YMIN=2014", 
+the index inside link represent pages of the site.
+'''
+
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
