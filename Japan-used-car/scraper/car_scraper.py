@@ -1,10 +1,6 @@
-'''
-This scraper is to be used only with link "https://www.carsensor.net/usedcar/spK/index1.html?YMIN=2014", 
-the index inside link represent pages of the site.
-'''
-
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 import requests
 
 def get_car_data(url):
@@ -16,12 +12,13 @@ def get_car_data(url):
     h3_ele = soup.findAll('div', class_='cassetteMain__carInfoContainer')
     places_handle = soup.findAll("div", class_="cassetteSub__area")
     trim_colors_handle = soup.findAll("ul",class_="carBodyInfoList")
+    scores_handle = soup.findAll("div", class_="cassetteSub__review")
 
     # Set column names
     columns = [
         "maker","car_name", "prices","base_price","trim", "color","year",
         "milage","permit_validity","repair_history","guarantee","engine_size",
-        "city","prefecture"
+        "city","prefecture","score"
                ]
     
     makers = []
@@ -38,6 +35,7 @@ def get_car_data(url):
     engine_size = []
     cities = []
     prefectures = []
+    scores = []
 
 
     # Loop to get trim and color of car, trim is eg: hatchback, sedan, SUV etc
@@ -120,6 +118,14 @@ def get_car_data(url):
 
         engine = detail[6].text
         engine_size.append(engine)
+    
+    for score_handle in scores_handle:
+        try:
+            score = float(score_handle.find("span").text)
+            scores.append(score)
+        except:
+            score = np.nan
+            scores.append(score)
 
     data = [
             makers,
@@ -135,12 +141,15 @@ def get_car_data(url):
             guarantees, 
             engine_size,
             cities,
-            prefectures
+            prefectures,
+            scores,
             ]    
     df = pd.concat([pd.Series(df) for df in data], axis=1, ignore_index=True)
     df.columns = columns
 
     return df
+
+get_car_data("https://www.carsensor.net/usedcar/spK/index1.html")
 
 all_df = []
 pages = int(input("How many pages of the link you wolud like to get data ? \n"))
